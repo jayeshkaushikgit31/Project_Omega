@@ -1,10 +1,5 @@
 # FHE Convolution-Friendly Image Compression Pipeline
 
-A Python/TenSEAL analysis and extension of the JPEG-inspired, CKKS-based image
-compression scheme described in *"Convolution-Friendly Image Compression with FHE"*
-(Mertens, Nicolas, Rovira - COSIC, KU Leuven / TII). Reference C++ implementation:
-[KULeuven-COSIC/img-processing-fhe](https://github.com/KULeuven-COSIC/img-processing-fhe).
-
 This repo contains a grayscale baseline plus a progression of RGB extensions that
 reduce homomorphic bandwidth well below the naive "encrypt each channel separately"
 approach, culminating in a version that supports 1024×1024×3 images. Also the sample images that we used are provided for reference.
