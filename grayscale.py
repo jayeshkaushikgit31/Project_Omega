@@ -87,18 +87,6 @@ def load_image(image_size: int) -> np.ndarray:
     Returns
     -------
     np.ndarray   shape (H, W), dtype uint8, values in [0, 255]
-
-    Why IMREAD_GRAYSCALE instead of the original BGR→RGB→[:,:,0]?
-    ---------------------------------------------------------------
-    The original Colab code did:
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        gray    = img_rgb[:, :, 0]          # <-- only the Red channel
-    Taking one channel of an RGB image is NOT grayscale conversion.
-    For a blue pixel (R=60, G=80, B=210) it gives 60 instead of the
-    correct luminance-weighted average of ~117 — a 57-value error.
-    cv2.IMREAD_GRAYSCALE uses the correct BT.601 weighted formula
-    (0.299R + 0.587G + 0.114B) and also works correctly when the
-    source file is already a true grayscale image.
     """
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -137,13 +125,15 @@ def generate_ckks_context(image_size: int) -> ts.Context:
     CKKSVector across multiple ciphertext chunks when the block count
     exceeds poly_modulus_degree/2.  Raising the degree trades speed
     for capacity.  128-bit security is maintained for both settings.
+    The 9-prime chain "coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 40, 40, 60]",
+    provides 7 multiplicative depth levels.
     """
     with silence_stdout_stderr():
         if image_size in (256, 512):
             context = ts.context(
                 ts.SCHEME_TYPE.CKKS,
                 poly_modulus_degree=16384,
-                coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 40, 40, 60],
+                coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 40, 40, 60], 
             )
         elif image_size in (1024, 2048):
             context = ts.context(
