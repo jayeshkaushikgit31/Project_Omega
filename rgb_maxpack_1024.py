@@ -244,6 +244,9 @@ def generate_ckks_context(total_slots_needed: int):
     Returns
     -------
     (context, poly_modulus_degree_used)
+
+    The 9-prime chain "coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 40, 40, 60]",
+    provides 7 multiplicative depth levels.
     """
     coeff_mod_bit_sizes = [60, 40, 40, 40, 40, 40, 40, 40, 60]
 
