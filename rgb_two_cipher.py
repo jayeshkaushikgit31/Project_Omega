@@ -183,6 +183,9 @@ def generate_ckks_context(image_size: int) -> ts.Context:
     need on the order of 16k-30k+ Y blocks, which overflows this context
     and would require a deeper parameter set (more primes -> more
     bandwidth), reopening the trade-off discussed for the grayscale case.
+
+    The 9-prime chain "coeff_mod_bit_sizes=[60, 40, 40, 40, 40, 40, 40, 40, 60]",
+    provides 7 multiplicative depth levels.
     """
     if image_size not in (256, 512):
         raise ValueError(
