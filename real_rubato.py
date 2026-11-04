@@ -5,16 +5,14 @@ import subprocess
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import time
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GO_BINARY_PATH = os.path.join(BASE_DIR, "go_real_rubato", "rubato_transcipher.exe")
 
 
-# Replace the existing extract_tiles function with this:
-
 def extract_tiles(img, tile_size):
     H, W, C = img.shape
-    # Pad the entire image by 1 pixel to handle edges smoothly
     padded_img = np.pad(img, ((1, 1), (1, 1), (0, 0)), mode="edge")
     ext_size = tile_size + 2
 
@@ -22,10 +20,7 @@ def extract_tiles(img, tile_size):
     coords = []
     for r in range(0, H, tile_size):
         for c in range(0, W, tile_size):
-            # Extract extended 34x34 tile
             tile = padded_img[r:r + ext_size, c:c + ext_size, :]
-
-            # If image size isn't a perfect multiple of tile_size, pad the tile itself
             if tile.shape[0] < ext_size or tile.shape[1] < ext_size:
                 tile = np.pad(tile, ((0, ext_size - tile.shape[0]),
                                      (0, ext_size - tile.shape[1]),
@@ -51,18 +46,15 @@ def main():
     tiles, coords, out_shape = extract_tiles(img_array, TILE_SIZE)
 
     print(f"Sending {len(tiles)} tiles to Go server for batch processing...")
-    print("NOTE: Initializing real MT-PRO cryptographic keys may take 5-15 seconds...")
+    print("NOTE: Initializing real MT-PRO cryptographic keys and performing 8 rotations per tile...")
 
     request = {
         "operation": op,
-        "tiles": tiles,  # Send all tiles at once!
+        "tiles": tiles,
         "tile_size": TILE_SIZE
     }
 
-    import time
     start = time.time()
-
-    # Call the Go binary ONCE
     result = subprocess.run(
         [GO_BINARY_PATH],
         input=json.dumps(request),
@@ -77,8 +69,6 @@ def main():
     response = json.loads(result.stdout)
 
     out = np.zeros(out_shape, dtype=np.float64)
-
-    # Unpack all processed tiles
     for i, (r, c) in enumerate(coords):
         out_tile = np.array(response["tiles"][i], dtype=np.float64).reshape(TILE_SIZE, TILE_SIZE, 3)
         rh = min(TILE_SIZE, out_shape[0] - r)
